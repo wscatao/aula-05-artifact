@@ -1,0 +1,28 @@
+name: Go Build Example
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  FILE_NAME: hello-server
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Build Go for ${{ matrix.os }}
+      run: |
+        if [ $RUNNER_OS == "Linux" ]; then
+          go build ${FILE_NAME}.go
+        elif [ $RUNNER_OS == "Windows" ]; then
+          GOOS=windows GOARCH=amd64 go build ${FILE_NAME}.go
+        fi
