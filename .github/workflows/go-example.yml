@@ -9,20 +9,34 @@ env:
   FILE_NAME: hello-server
 
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Build Go for ${{ matrix.os }}
-      run: |
-        if [ $RUNNER_OS == "Linux" ]; then
-          go build ${FILE_NAME}.go
-        elif [ $RUNNER_OS == "Windows" ]; then
-          GOOS=windows GOARCH=amd64 go build ${FILE_NAME}.go
-        fi
+    - name: Build Go for Linux
+      run: go build ${FILE_NAME}.go
+
+    - name: Upload artifact for Linux
+      uses: actions/upload-artifact@v1
+      with:
+        name: linux
+        path: ./${{ env.FILE_NAME }}
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Build Go for Windows
+      run: GOOS=windows GOARCH=amd64 go build ${FILE_NAME}.go
+
+    - name: Upload artifact for Windows
+      uses: actions/upload-artifact@v1
+      with:
+        name: windows
+        path: ./${{ env.FILE_NAME }}.exe
