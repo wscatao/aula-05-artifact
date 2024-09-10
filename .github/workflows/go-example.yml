@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: '*/15 * * * 1-6'
 
 env:
   FILE_NAME: hello-server
@@ -15,6 +17,11 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.20'
 
     - name: Build Go for Linux
       run: go build ${FILE_NAME}.go
@@ -32,6 +39,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.20'
+
     - name: Build Go for Windows
       run: |
         $env:GOOS="windows"
@@ -43,3 +55,32 @@ jobs:
       with:
         name: windows
         path: ./${{ env.FILE_NAME }}.exe
+
+  download-and-run-linux:
+    runs-on: ubuntu-latest
+    needs: build-linux
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Download artifact for Linux
+      uses: actions/download-artifact@v3
+      with:
+        name: linux
+
+    - name: Run script
+      run: source ./run.sh
+
+  download-only-windows:
+    runs-on: windows-latest
+    needs: build-windows
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Download artifact for Windows
+      uses: actions/download-artifact@v3
+      with:
+        name: windows
